@@ -6,274 +6,85 @@
   <title>تتبع الحسابات</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f2f2f2; color: #1a1a1a; min-height: 100vh; }
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
-      background: #f2f2f2;
-      color: #1a1a1a;
-      min-height: 100vh;
-    }
-
-    /* ===== SIDEBAR ===== */
-    .sidebar {
-      position: fixed;
-      top: 0; right: 0;
-      width: 240px;
-      height: 100vh;
-      background: #fff;
-      border-left: 1px solid #e5e5e5;
-      display: flex;
-      flex-direction: column;
-      z-index: 100;
-    }
-
-    .sidebar-header {
-      padding: 1.25rem 1rem 1rem;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    .sidebar-title {
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 10px;
-    }
-
-    .btn-new-page {
-      width: 100%;
-      padding: 8px;
-      background: #1a1a1a;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 13px;
-      font-family: inherit;
-      cursor: pointer;
-    }
+    .sidebar { position: fixed; top: 0; right: 0; width: 240px; height: 100vh; background: #fff; border-left: 1px solid #e5e5e5; display: flex; flex-direction: column; z-index: 100; }
+    .sidebar-header { padding: 1.25rem 1rem 1rem; border-bottom: 1px solid #f0f0f0; }
+    .sidebar-title { font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+    .btn-new-page { width: 100%; padding: 8px; background: #1a1a1a; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-family: inherit; cursor: pointer; }
     .btn-new-page:hover { background: #333; }
-
-    .pages-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 8px;
-    }
-
-    .page-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 9px 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      margin-bottom: 2px;
-      transition: background 0.1s;
-    }
-
+    .pages-list { flex: 1; overflow-y: auto; padding: 8px; }
+    .page-item { display: flex; align-items: center; justify-content: space-between; padding: 9px 10px; border-radius: 8px; cursor: pointer; font-size: 14px; margin-bottom: 2px; transition: background 0.1s; }
     .page-item:hover { background: #f5f5f5; }
     .page-item.active { background: #f0f0f0; font-weight: 500; }
-
     .page-item-left { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
     .page-item-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .page-item-bal { font-size: 11px; color: #888; }
     .page-item-bal.pos { color: #c0392b; }
     .page-item-bal.neg { color: #27ae60; }
-
-    .btn-del-page {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #ccc;
-      font-size: 16px;
-      padding: 2px 4px;
-      border-radius: 4px;
-      flex-shrink: 0;
-    }
+    .btn-del-page { background: none; border: none; cursor: pointer; color: #ccc; font-size: 16px; padding: 2px 4px; border-radius: 4px; flex-shrink: 0; }
     .btn-del-page:hover { color: #e74c3c; background: #fff0ef; }
+    .sidebar-footer { padding: 10px; border-top: 1px solid #f0f0f0; font-size: 12px; color: #bbb; text-align: center; }
 
-    .sidebar-footer {
-      padding: 10px;
-      border-top: 1px solid #f0f0f0;
-      font-size: 12px;
-      color: #bbb;
-      text-align: center;
-    }
-
-    /* ===== MAIN ===== */
-    .main {
-      margin-right: 240px;
-      padding: 2rem 1.5rem;
-      min-height: 100vh;
-    }
-
+    .main { margin-right: 240px; padding: 2rem 1.5rem; min-height: 100vh; }
     .page-view { display: none; }
     .page-view.active { display: block; }
-
-    .page-top {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 1.5rem;
-    }
-
-    .page-name-display {
-      font-size: 20px;
-      font-weight: 600;
-      cursor: pointer;
-      border-bottom: 2px dashed transparent;
-      padding-bottom: 2px;
-    }
+    .page-top { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .page-name-display { font-size: 20px; font-weight: 600; cursor: pointer; border-bottom: 2px dashed transparent; padding-bottom: 2px; }
     .page-name-display:hover { border-color: #ddd; }
+    .page-name-input { font-size: 20px; font-weight: 600; border: none; border-bottom: 2px solid #1a1a1a; outline: none; background: transparent; font-family: inherit; color: #1a1a1a; width: 200px; }
 
-    .page-name-input {
-      font-size: 20px;
-      font-weight: 600;
-      border: none;
-      border-bottom: 2px solid #1a1a1a;
-      outline: none;
-      background: transparent;
-      font-family: inherit;
-      color: #1a1a1a;
-      width: 200px;
-    }
-
-    .metrics {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 1.5rem;
-    }
-
-    .metric {
-      background: #fff;
-      border: 1px solid #e5e5e5;
-      border-radius: 10px;
-      padding: 1rem;
-      text-align: center;
-    }
-
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 1.5rem; }
+    .metric { background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; padding: 1rem; text-align: center; }
     .metric-label { font-size: 12px; color: #888; margin-bottom: 6px; }
     .metric-val { font-size: 22px; font-weight: 600; }
-    .metric-val.buy  { color: #c0392b; }
-    .metric-val.pay  { color: #27ae60; }
+    .metric-val.buy { color: #c0392b; }
+    .metric-val.pay { color: #27ae60; }
 
-    .card {
-      background: #fff;
-      border: 1px solid #e5e5e5;
-      border-radius: 10px;
-      padding: 1rem 1.25rem;
-      margin-bottom: 1rem;
-    }
-
-    .input-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    input[type="number"], input[type="text"] {
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 14px;
-      outline: none;
-      background: #fafafa;
-      color: #1a1a1a;
-      font-family: inherit;
-    }
+    .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; }
+    .input-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    input[type="number"], input[type="text"] { border: 1px solid #ddd; border-radius: 8px; padding: 8px 12px; font-size: 14px; outline: none; background: #fafafa; color: #1a1a1a; font-family: inherit; }
     input[type="number"] { width: 130px; }
-    input[type="text"]   { flex: 1; min-width: 120px; }
+    input[type="text"] { flex: 1; min-width: 120px; }
     input:focus { border-color: #aaa; background: #fff; }
-
-    .btn {
-      padding: 8px 16px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      cursor: pointer;
-      font-size: 14px;
-      font-family: inherit;
-      background: #fff;
-      color: #1a1a1a;
-    }
+    .btn { padding: 8px 16px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; font-size: 14px; font-family: inherit; background: #fff; color: #1a1a1a; }
     .btn:hover { background: #f5f5f5; }
-    .btn-buy  { border-color: #e74c3c; color: #c0392b; }
-    .btn-buy:hover  { background: #fff0ef; }
-    .btn-pay  { border-color: #2ecc71; color: #27ae60; }
-    .btn-pay:hover  { background: #edfbf3; }
-    .btn-sm   { font-size: 12px; padding: 4px 10px; color: #999; border-color: #e5e5e5; }
+    .btn-buy { border-color: #e74c3c; color: #c0392b; }
+    .btn-buy:hover { background: #fff0ef; }
+    .btn-pay { border-color: #2ecc71; color: #27ae60; }
+    .btn-pay:hover { background: #edfbf3; }
+    .btn-sm { font-size: 12px; padding: 4px 10px; color: #999; border-color: #e5e5e5; }
 
-    .history-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
+    .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .history-header span { font-size: 14px; font-weight: 500; }
-
-    .history-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid #f5f5f5;
-      font-size: 14px;
-    }
+    .history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-size: 14px; }
     .history-item:last-child { border-bottom: none; }
-
-    .item-left  { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .item-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .item-right { display: flex; align-items: center; gap: 10px; }
-
     .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 6px; }
     .badge-buy { background: #fff0ef; color: #c0392b; }
     .badge-pay { background: #edfbf3; color: #27ae60; }
-
     .item-note { color: #888; font-size: 13px; }
     .item-time { color: #bbb; font-size: 12px; }
     .item-amount { font-weight: 600; }
     .item-amount.buy { color: #c0392b; }
     .item-amount.pay { color: #27ae60; }
-
-    .btn-del-entry {
-      background: none; border: none; cursor: pointer;
-      color: #ccc; font-size: 18px; line-height: 1; padding: 0 4px;
-    }
+    .btn-del-entry { background: none; border: none; cursor: pointer; color: #ccc; font-size: 18px; line-height: 1; padding: 0 4px; }
     .btn-del-entry:hover { color: #e74c3c; }
-
     .empty { text-align: center; color: #bbb; font-size: 14px; padding: 1.5rem 0; }
 
-    .welcome {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 60vh;
-      color: #bbb;
-      text-align: center;
-      gap: 12px;
-    }
+    .welcome { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh; color: #bbb; text-align: center; gap: 12px; }
     .welcome h2 { font-size: 18px; font-weight: 500; color: #888; }
-    .welcome p  { font-size: 14px; }
 
-    /* Mobile */
-    .mobile-menu-btn {
-      display: none;
-      position: fixed;
-      top: 12px;
-      right: 12px;
-      z-index: 200;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 6px 10px;
-      font-size: 18px;
-      cursor: pointer;
-    }
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1a1a1a; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 999; }
+    .toast.show { opacity: 1; }
+
+    .loading { text-align: center; color: #bbb; font-size: 13px; padding: 1rem 0; }
+
+    .mobile-menu-btn { display: none; position: fixed; top: 12px; right: 12px; z-index: 200; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 6px 10px; font-size: 18px; cursor: pointer; }
 
     @media (max-width: 640px) {
-      .sidebar {
-        transform: translateX(100%);
-        transition: transform 0.2s;
-      }
+      .sidebar { transform: translateX(100%); transition: transform 0.2s; }
       .sidebar.open { transform: translateX(0); }
       .main { margin-right: 0; padding: 1rem; padding-top: 3.5rem; }
       .mobile-menu-btn { display: block; }
@@ -287,14 +98,15 @@
 <body>
 
 <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="toast" id="toast"></div>
 
 <div class="sidebar" id="sidebar">
   <div class="sidebar-header">
     <div class="sidebar-title">📋 الحسابات</div>
     <button class="btn-new-page" onclick="newPage()">+ إضافة حساب جديد</button>
   </div>
-  <div class="pages-list" id="pages-list"></div>
-  <div class="sidebar-footer">البيانات محفوظة على جهازك</div>
+  <div class="pages-list" id="pages-list"><p class="loading">جار التحميل...</p></div>
+  <div class="sidebar-footer" id="sync-status">🔄 جار الاتصال...</div>
 </div>
 
 <div class="main" id="main">
@@ -305,149 +117,209 @@
   <div id="pages-container"></div>
 </div>
 
-<script>
-  let data = JSON.parse(localStorage.getItem('accounts_data') || '{"pages":[]}');
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore, collection, doc, addDoc, setDoc, deleteDoc,
+    onSnapshot, query, orderBy, serverTimestamp, writeBatch
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCdT6hp9NQvCee1R-IkjCEE4mx3m483VDw",
+    authDomain: "trust-group-3796d.firebaseapp.com",
+    projectId: "trust-group-3796d",
+    storageBucket: "trust-group-3796d.firebasestorage.app",
+    messagingSenderId: "1096868997914",
+    appId: "1:1096868997914:web:05bd68204a10749ebf5aa3"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  let pages = {};         // { pageId: { id, name, entries: {} } }
   let currentPageId = null;
 
-  function save() {
-    localStorage.setItem('accounts_data', JSON.stringify(data));
+  // ===== TOAST =====
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2500);
   }
 
   function fmt(n) { return Number(n).toLocaleString('ar-EG'); }
 
-  function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+  // ===== FIRESTORE LISTENERS =====
+  // Listen to pages
+  onSnapshot(query(collection(db, 'pages'), orderBy('createdAt')), snap => {
+    // Remove deleted pages
+    const ids = snap.docs.map(d => d.id);
+    Object.keys(pages).forEach(id => {
+      if (!ids.includes(id)) {
+        delete pages[id];
+        const el = document.getElementById('page-' + id);
+        if (el) el.remove();
+        if (currentPageId === id) {
+          currentPageId = null;
+          document.getElementById('welcome').style.display = 'flex';
+        }
+      }
+    });
 
-  function newPage() {
+    snap.docs.forEach(d => {
+      if (!pages[d.id]) {
+        pages[d.id] = { id: d.id, name: d.data().name, entries: {} };
+        // Listen to entries for this page
+        listenEntries(d.id);
+      } else {
+        pages[d.id].name = d.data().name;
+      }
+    });
+
+    renderSidebar();
+    document.getElementById('sync-status').textContent = '🟢 متصل — البيانات محفوظة';
+  }, err => {
+    document.getElementById('sync-status').textContent = '🔴 تحقق من الاتصال';
+    console.error(err);
+  });
+
+  function listenEntries(pageId) {
+    onSnapshot(
+      query(collection(db, 'pages', pageId, 'entries'), orderBy('createdAt')),
+      snap => {
+        if (!pages[pageId]) return;
+        pages[pageId].entries = {};
+        snap.docs.forEach(d => {
+          pages[pageId].entries[d.id] = { id: d.id, ...d.data() };
+        });
+        renderSidebar();
+        renderPageContent(pageId);
+        if (!currentPageId && Object.keys(pages).length > 0) {
+          openPage(Object.keys(pages)[0]);
+        }
+      }
+    );
+  }
+
+  // ===== PAGES =====
+  window.newPage = async function() {
     const name = prompt('اسم الحساب الجديد:');
     if (!name || !name.trim()) return;
-    const page = { id: genId(), name: name.trim(), entries: [] };
-    data.pages.push(page);
-    save();
-    renderSidebar();
-    openPage(page.id);
-    closeSidebar();
-  }
+    await addDoc(collection(db, 'pages'), { name: name.trim(), createdAt: serverTimestamp() });
+    toast('✅ تم إضافة الحساب');
+  };
 
-  function deletePage(id) {
-    const page = data.pages.find(p => p.id === id);
+  window.deletePage = async function(id) {
+    const page = pages[id];
     if (!page) return;
     if (!confirm(`هتحذف حساب "${page.name}"؟`)) return;
-    data.pages = data.pages.filter(p => p.id !== id);
-    save();
-    if (currentPageId === id) {
-      currentPageId = null;
-      document.getElementById('welcome').style.display = 'flex';
-    }
-    renderSidebar();
-    renderPages();
-  }
+    const batch = writeBatch(db);
+    Object.keys(page.entries).forEach(eid => {
+      batch.delete(doc(db, 'pages', id, 'entries', eid));
+    });
+    batch.delete(doc(db, 'pages', id));
+    await batch.commit();
+    toast('🗑 تم حذف الحساب');
+  };
 
-  function openPage(id) {
-    currentPageId = id;
-    document.getElementById('welcome').style.display = 'none';
-    document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
-    const el = document.getElementById('page-' + id);
-    if (el) el.classList.add('active');
-    renderSidebar();
-  }
-
-  function renamePage(id) {
-    const page = data.pages.find(p => p.id === id);
-    if (!page) return;
+  window.renamePage = function(id) {
     const nameDisplay = document.getElementById('name-display-' + id);
     const nameInput   = document.getElementById('name-input-' + id);
     nameDisplay.style.display = 'none';
     nameInput.style.display   = 'inline-block';
-    nameInput.value = page.name;
-    nameInput.focus();
-    nameInput.select();
-  }
+    nameInput.value = pages[id]?.name || '';
+    nameInput.focus(); nameInput.select();
+  };
 
-  function finishRename(id) {
-    const page = data.pages.find(p => p.id === id);
-    if (!page) return;
+  window.finishRename = async function(id) {
     const nameInput = document.getElementById('name-input-' + id);
     const newName = nameInput.value.trim();
-    if (newName) page.name = newName;
-    save();
-    renderSidebar();
-    document.getElementById('name-display-' + id).textContent = page.name;
-    document.getElementById('name-display-' + id).style.display = 'inline';
-    nameInput.style.display = 'none';
-  }
+    if (newName && pages[id] && newName !== pages[id].name) {
+      await setDoc(doc(db, 'pages', id), { name: newName }, { merge: true });
+      toast('✏️ تم تعديل الاسم');
+    }
+    const nameDisplay = document.getElementById('name-display-' + id);
+    if (nameDisplay) { nameDisplay.style.display = 'inline'; nameInput.style.display = 'none'; }
+  };
 
-  function addEntry(pageId, type) {
-    const page = data.pages.find(p => p.id === pageId);
-    if (!page) return;
+  // ===== ENTRIES =====
+  window.addEntry = async function(pageId, type) {
     const amt  = parseFloat(document.getElementById('amt-' + pageId).value);
     const note = document.getElementById('note-' + pageId).value.trim();
     if (!amt || amt <= 0) { alert('من فضلك ادخل مبلغ صحيح'); return; }
-    page.entries.push({
-      id: genId(), type, amount: amt, note,
-      time: new Date().toLocaleString('ar-EG', { hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit' })
+    await addDoc(collection(db, 'pages', pageId, 'entries'), {
+      type, amount: amt, note,
+      time: new Date().toLocaleString('ar-EG', { hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit' }),
+      createdAt: serverTimestamp()
     });
     document.getElementById('amt-' + pageId).value  = '';
     document.getElementById('note-' + pageId).value = '';
-    save();
-    renderPageContent(pageId);
-    renderSidebar();
-  }
+    toast(type === 'buy' ? '🛒 تم إضافة شراء' : '✅ تم إضافة سداد');
+  };
 
-  function deleteEntry(pageId, entryId) {
-    const page = data.pages.find(p => p.id === pageId);
-    if (!page) return;
-    page.entries = page.entries.filter(e => e.id !== entryId);
-    save();
-    renderPageContent(pageId);
-    renderSidebar();
-  }
+  window.deleteEntry = async function(pageId, entryId) {
+    await deleteDoc(doc(db, 'pages', pageId, 'entries', entryId));
+    toast('🗑 تم الحذف');
+  };
 
-  function clearPageEntries(pageId) {
-    const page = data.pages.find(p => p.id === pageId);
-    if (!page || page.entries.length === 0) return;
+  window.clearPageEntries = async function(pageId) {
+    const page = pages[pageId];
+    if (!page || Object.keys(page.entries).length === 0) return;
     if (!confirm('هتمسح كل السجل؟')) return;
-    page.entries = [];
-    save();
-    renderPageContent(pageId);
-    renderSidebar();
-  }
+    const batch = writeBatch(db);
+    Object.keys(page.entries).forEach(eid => {
+      batch.delete(doc(db, 'pages', pageId, 'entries', eid));
+    });
+    await batch.commit();
+    toast('🗑 تم مسح السجل');
+  };
 
+  // ===== RENDER =====
   function getBalance(page) {
-    const buy = page.entries.filter(e => e.type === 'buy').reduce((s,e) => s + e.amount, 0);
-    const pay = page.entries.filter(e => e.type === 'pay').reduce((s,e) => s + e.amount, 0);
+    const entries = Object.values(page.entries);
+    const buy = entries.filter(e => e.type === 'buy').reduce((s,e) => s + e.amount, 0);
+    const pay = entries.filter(e => e.type === 'pay').reduce((s,e) => s + e.amount, 0);
     return { buy, pay, bal: buy - pay };
   }
 
   function renderSidebar() {
     const list = document.getElementById('pages-list');
-    if (data.pages.length === 0) {
+    const pageArr = Object.values(pages);
+    if (pageArr.length === 0) {
       list.innerHTML = '<p style="font-size:13px;color:#bbb;text-align:center;padding:1rem;">لا يوجد حسابات بعد</p>';
       return;
     }
-    list.innerHTML = data.pages.map(p => {
+    list.innerHTML = pageArr.map(p => {
       const { bal } = getBalance(p);
       const balClass = bal > 0 ? 'pos' : bal < 0 ? 'neg' : '';
-      const balText  = bal !== 0 ? (bal > 0 ? 'متبقي: ' : 'زيادة سداد: ') + fmt(Math.abs(bal)) : 'مسوّى';
+      const balText  = bal !== 0 ? (bal > 0 ? 'متبقي: ' : 'زيادة: ') + fmt(Math.abs(bal)) : 'مسوّى';
       return `
-        <div class="page-item ${p.id === currentPageId ? 'active' : ''}" onclick="openPage('${p.id}'); closeSidebar();">
+        <div class="page-item ${p.id === currentPageId ? 'active' : ''}" onclick="openPage('${p.id}')">
           <div class="page-item-left">
             <span class="page-item-name">${p.name}</span>
             <span class="page-item-bal ${balClass}">${balText}</span>
           </div>
-          <button class="btn-del-page" onclick="event.stopPropagation(); deletePage('${p.id}')" title="حذف">×</button>
+          <button class="btn-del-page" onclick="event.stopPropagation();deletePage('${p.id}')" title="حذف">×</button>
         </div>`;
     }).join('');
   }
 
-  function renderPages() {
-    const container = document.getElementById('pages-container');
-    container.innerHTML = data.pages.map(p => `<div class="page-view ${p.id === currentPageId ? 'active' : ''}" id="page-${p.id}"></div>`).join('');
-    data.pages.forEach(p => renderPageContent(p.id));
-  }
+  window.openPage = function(id) {
+    currentPageId = id;
+    document.getElementById('welcome').style.display = 'none';
+    document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
+    let el = document.getElementById('page-' + id);
+    if (!el) renderPageContent(id);
+    el = document.getElementById('page-' + id);
+    if (el) el.classList.add('active');
+    renderSidebar();
+    closeSidebar();
+  };
 
   function renderPageContent(pageId) {
-    const page = data.pages.find(p => p.id === pageId);
+    const page = pages[pageId];
     if (!page) return;
+
     let el = document.getElementById('page-' + pageId);
     if (!el) {
       el = document.createElement('div');
@@ -459,9 +331,10 @@
     const { buy, pay, bal } = getBalance(page);
     const balColor = bal > 0 ? '#c0392b' : bal < 0 ? '#27ae60' : '#1a1a1a';
 
-    const historyHTML = page.entries.length === 0
+    const entryArr = Object.values(page.entries).sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+    const historyHTML = entryArr.length === 0
       ? '<p class="empty">لا يوجد سجل بعد</p>'
-      : [...page.entries].reverse().map(e => {
+      : entryArr.map(e => {
           const isBuy = e.type === 'buy';
           return `
             <div class="history-item">
@@ -477,6 +350,9 @@
             </div>`;
         }).join('');
 
+    const amtVal  = document.getElementById('amt-'  + pageId)?.value  || '';
+    const noteVal = document.getElementById('note-' + pageId)?.value || '';
+
     el.innerHTML = `
       <div class="page-top">
         <span class="page-name-display" id="name-display-${pageId}" onclick="renamePage('${pageId}')" title="اضغط للتعديل">${page.name}</span>
@@ -485,31 +361,19 @@
           onkeydown="if(event.key==='Enter') finishRename('${pageId}')" />
         <span style="font-size:12px;color:#bbb;">(اضغط الاسم للتعديل)</span>
       </div>
-
       <div class="metrics">
-        <div class="metric">
-          <div class="metric-label">إجمالي الشراء</div>
-          <div class="metric-val buy">${fmt(buy)}</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">إجمالي السداد</div>
-          <div class="metric-val pay">${fmt(pay)}</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">المتبقي</div>
-          <div class="metric-val" style="color:${balColor}">${fmt(bal)}</div>
-        </div>
+        <div class="metric"><div class="metric-label">إجمالي الشراء</div><div class="metric-val buy">${fmt(buy)}</div></div>
+        <div class="metric"><div class="metric-label">إجمالي السداد</div><div class="metric-val pay">${fmt(pay)}</div></div>
+        <div class="metric"><div class="metric-label">المتبقي</div><div class="metric-val" style="color:${balColor}">${fmt(bal)}</div></div>
       </div>
-
       <div class="card">
         <div class="input-row">
-          <input type="number" id="amt-${pageId}"  placeholder="المبلغ" min="0" step="any" />
-          <input type="text"   id="note-${pageId}" placeholder="ملاحظة (اختياري)" />
+          <input type="number" id="amt-${pageId}"  placeholder="المبلغ" min="0" step="any" value="${amtVal}" />
+          <input type="text"   id="note-${pageId}" placeholder="ملاحظة (اختياري)" value="${noteVal}" />
           <button class="btn btn-buy" onclick="addEntry('${pageId}','buy')">+ شراء</button>
           <button class="btn btn-pay" onclick="addEntry('${pageId}','pay')">✓ سداد</button>
         </div>
       </div>
-
       <div class="card">
         <div class="history-header">
           <span>السجل</span>
@@ -519,18 +383,8 @@
       </div>`;
   }
 
-  function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('open');
-  }
-
-  function closeSidebar() {
-    document.getElementById('sidebar').classList.remove('open');
-  }
-
-  // Init
-  renderSidebar();
-  renderPages();
-  if (data.pages.length > 0) openPage(data.pages[0].id);
+  window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); };
+  window.closeSidebar  = function() { document.getElementById('sidebar').classList.remove('open'); };
 </script>
 </body>
 </html>
